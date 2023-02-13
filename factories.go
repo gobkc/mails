@@ -32,7 +32,7 @@ type Email interface {
 	VerifyOTP(email, code string) error
 }
 
-var cache map[any]any
+var cache = make(map[any]any)
 var l sync.Mutex
 
 func EmailFactory[T any]() (t *T) {

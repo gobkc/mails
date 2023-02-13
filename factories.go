@@ -35,15 +35,15 @@ type Email interface {
 var cache = make(map[any]any)
 var l sync.Mutex
 
-func EmailFactory[T Email]() (t *T) {
+func EmailFactory[T Email]() (t T) {
 	target := reflect.TypeOf(t)
 	l.Lock()
 	defer l.Unlock()
 	find, ok := cache[target]
 	if ok {
-		return find.(*T)
+		return find.(T)
 	}
 	v := new(T)
-	cache[target] = v
-	return v
+	cache[target] = *v
+	return *v
 }

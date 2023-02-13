@@ -69,7 +69,7 @@ type otpCache struct {
 func (d *DefaultEmail) SendOTPToMail(to, subject, body string) error {
 	l.Lock()
 	defer l.Unlock()
-	otp := Random(4)
+	otp := strings.ToUpper(Random(4))
 	if body == `` {
 		body = otpTemplate
 	}
@@ -112,19 +112,32 @@ func (d *DefaultEmail) SendOTPToMail(to, subject, body string) error {
 }
 
 func (d *DefaultEmail) VerifyOTP(email, code string) error {
+	l.Lock()
+	defer l.Unlock()
+	find, ok := cache[email]
+	if !ok {
+		return fmt.Errorf("VerifyOTP:EmailNotExists")
+	}
+	otp := find.(otpCache)
+	if otp.Code != code {
+		return fmt.Errorf("VerifyOTP:OTPCodeFailed")
+	}
+	if otp.UpdateTime.Add(1*time.Hour).Unix() < time.Now().Unix() {
+		return fmt.Errorf("VerifyOTP:TimedOut")
+	}
 	return nil
 }
 
 func Random(strLen int) (str string) {
-	if strLen == 0 {
-		return
-	}
 	var (
 		randByte  = make([]byte, strLen)
 		formatStr []string
-		outPut    []interface{}
+		out       []interface{}
 		byteHalf  uint8 = 127
 	)
+	if strLen == 0 {
+		return
+	}
 	rand.Read(randByte)
 	for _, b := range randByte {
 		if b > byteHalf {
@@ -132,9 +145,9 @@ func Random(strLen int) (str string) {
 		} else {
 			formatStr = append(formatStr, "%x")
 		}
-		outPut = append(outPut, b)
+		out = append(out, b)
 	}
-	if str = fmt.Sprintf(strings.Join(formatStr, ""), outPut...); len(str) > strLen {
+	if str = fmt.Sprintf(strings.Join(formatStr, ""), out...); len(str) > strLen {
 		str = str[:strLen]
 	}
 	return

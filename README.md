@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	mail := mails.EmailFactory[*mails.DefaultEmail]()
+	mail := mails.Factory(&DefaultEmail{})
 	if err := mail.SetEnv("example@163.com", "examplepassword", "smtp.163.com:25"); err != nil {
 		log.Println(err.Error())
 		return

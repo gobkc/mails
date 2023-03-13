@@ -18,7 +18,7 @@ type DefaultEmail struct {
 	ct       []byte
 }
 
-func (d DefaultEmail) SetEnv(userName, password, mailServer string, mailType ...MailType) error {
+func (d *DefaultEmail) SetEnv(userName, password, mailServer string, mailType ...MailType) error {
 	d.fullServ = mailServer
 	serverList := strings.Split(mailServer, ":")
 	if len(serverList) < 2 {
@@ -35,7 +35,7 @@ func (d DefaultEmail) SetEnv(userName, password, mailServer string, mailType ...
 	return nil
 }
 
-func (d DefaultEmail) SendToMail(to, subject, body string) error {
+func (d *DefaultEmail) SendToMail(to, subject, body string) error {
 	var msg bytes.Buffer
 	msg.WriteString("To: ")
 	msg.WriteString(to)
@@ -66,7 +66,7 @@ type otpCache struct {
 	UpdateTime time.Time
 }
 
-func (d DefaultEmail) SendOTPToMail(to, subject, body string) error {
+func (d *DefaultEmail) SendOTPToMail(to, subject, body string) error {
 	l.Lock()
 	defer l.Unlock()
 	otp := strings.ToUpper(Random(4))
@@ -111,7 +111,7 @@ func (d DefaultEmail) SendOTPToMail(to, subject, body string) error {
 	return d.SendToMail(to, subject, result)
 }
 
-func (d DefaultEmail) VerifyOTP(email, code string) error {
+func (d *DefaultEmail) VerifyOTP(email, code string) error {
 	l.Lock()
 	defer l.Unlock()
 	find, ok := cache[email]
